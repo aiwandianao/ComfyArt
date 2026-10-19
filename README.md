@@ -51,6 +51,19 @@ The Agent panel runs a real tool-using agent on the backend, ported from [ComfyT
 
 Storyboard split, OCR, brand and memory extraction, reference notes and the Ideogram caption are single calls to the default Agent (`POST /comfyart/bot/complete`, no tools). ComfyArt never stores credentials. The agent works through the ComfyArt MCP server at `POST /comfyart/mcp` (look at the canvas, generate and edit images, videos, audio and 3D models, Edit Elements and mockups, place text, shapes, frames, web pages and slides, memory, skills, ask the user). Canvas tools are executed by the open ComfyArt tab of the project, so keep it open while the agent works. Chats are saved in a SQLite database at `user/__comfyart/data.db` and keep running when the panel is closed.
 
+## Command-line access
+
+Agents and terminal users can discover MCP tools, edit an open canvas, or submit a prepared ComfyUI API graph with the standard-library Python CLI. No extra installation is needed.
+
+```shell
+python scripts/comfyart.py schema
+python scripts/comfyart.py tools list
+python scripts/comfyart.py --project project-id tools call get_canvas
+python scripts/comfyart.py run --file prepared.api.json
+```
+
+Canvas calls require MCP enabled and the project open in a browser. Headless graph runs do not require either. Commands return JSON with process exit codes. See the [CLI how-to](docs/cli.md) and [CLI reference](docs/cli-reference.md).
+
 ## Workflows and models
 
 Every canvas action runs one of the API workflows in `workflows/` through ComfyUI's `/prompt`. They use core nodes unless noted.

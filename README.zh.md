@@ -45,6 +45,19 @@ Agent 面板在后端运行一个真正会调用工具的 Agent，移植自 [Com
 
 智能分镜、OCR、品牌和记忆提取、参考图说明、Ideogram 的结构化描述，都是对默认 Agent 的单次调用（`POST /comfyart/bot/complete`，不带工具）。ComfyArt 从不保存任何凭据。Agent 通过 `POST /comfyart/mcp` 上的 ComfyArt MCP 服务器干活（查看画布、生成和编辑图片、视频、音频和 3D 模型、编辑元素和样机、放置文字、形状、画板、网页和幻灯片、记忆、技能、向用户提问）。画布工具由该项目打开着的 ComfyArt 标签页执行，所以 Agent 工作时请保持页面打开。对话保存在 SQLite 数据库 `user/__comfyart/data.db` 里，关掉面板也会继续运行。
 
+## 命令行操作
+
+Agent 和终端用户可以通过 Python 标准库 CLI 查询 MCP 工具、编辑打开的画布，或提交准备好的 ComfyUI API 工作流，无需额外安装依赖。
+
+```shell
+python scripts/comfyart.py schema
+python scripts/comfyart.py tools list
+python scripts/comfyart.py --project project-id tools call get_canvas
+python scripts/comfyart.py run --file prepared.api.json
+```
+
+画布操作需要开启 MCP，并保持目标项目的浏览器标签页连接。直接运行 API 工作流不需要这两个条件。操作结果统一输出 JSON，并通过退出码表示成功或失败。使用方法见 [CLI 操作指南](docs/cli.md) 和 [CLI 参考](docs/cli-reference.md)。
+
 ## 工作流和模型
 
 画布上的每个操作都通过 ComfyUI 的 `/prompt` 运行 `workflows/` 里的某个 API 工作流。除特别注明外都只用核心节点。
