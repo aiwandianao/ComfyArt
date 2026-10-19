@@ -26,6 +26,20 @@ async def comfyart_index(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(index, headers={"Cache-Control": "no-cache"})
 
 
+@routes.get("/comfyart/workflows")
+async def comfyart_workflows(request: web.Request) -> web.Response:
+    root = WORKFLOWS.resolve()
+    names = []
+    for path in WORKFLOWS.glob("*.json"):
+        try:
+            resolved = path.resolve()
+            if resolved.parent == root and resolved.suffix == ".json" and resolved.is_file():
+                names.append(path.name)
+        except (OSError, RuntimeError):
+            continue
+    return web.json_response({"workflows": [{"name": name} for name in sorted(names)]})
+
+
 @routes.get("/comfyart/workflows/{name}")
 async def comfyart_workflow(request: web.Request) -> web.StreamResponse:
     name = request.match_info["name"]

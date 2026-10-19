@@ -71,3 +71,34 @@ def test_image_model_workflows_follow_the_generator_layout():
         assert "batch_size" in graph["5"]["inputs"], m["id"]
         assert graph["9"]["class_type"].startswith("Save"), m["id"]
         assert m["prompt"][0] in graph["6"]["inputs"], m["id"]
+
+
+async def test_workflow_index_lists_host_json_files(bot_client, tmp_path, monkeypatch):
+    import ComfyArt
+
+    (tmp_path / "z.api.json").write_text("{}")
+    (tmp_path / "a.api.json").write_text("{}")
+    (tmp_path / "ignored.txt").write_text("{}")
+    (tmp_path / "directory.json").mkdir()
+    monkeypatch.setattr(ComfyArt, "WORKFLOWS", tmp_path)
+    response = await bot_client.get("/comfyart/workflows")
+    assert response.status == 200
+    assert await response.json() == {"workflows": [{"name": "a.api.json"}, {"name": "z.api.json"}]}
+
+
+async def test_workflow_index_excludes_external_symlinks(bot_client, tmp_path, monkeypatch):
+    import ComfyArt
+    import pytest
+
+    workflows = tmp_path / "workflows"
+    workflows.mkdir()
+    external = tmp_path / "external.json"
+    external.write_text("{}")
+    try:
+        (workflows / "escape.json").symlink_to(external)
+    except OSError:
+        pytest.skip("Creating symlinks requires platform support or permission")
+    monkeypatch.setattr(ComfyArt, "WORKFLOWS", workflows)
+    response = await bot_client.get("/comfyart/workflows")
+    assert response.status == 200
+    assert await response.json() == {"workflows": []}
